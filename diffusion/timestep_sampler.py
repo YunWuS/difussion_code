@@ -21,7 +21,7 @@ def create_named_schedule_sampler(name, diffusion):
     elif name == "loss-second-moment":
         return LossSecondMomentResampler(diffusion)
     else:
-        raise NotImplementedError(f"unknown schedule sampler: {name}")
+        return UniformSampler(diffusion)
 
 
 class ScheduleSampler(ABC):

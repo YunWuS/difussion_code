@@ -90,7 +90,7 @@ def get_beta_schedule(beta_schedule, *, beta_start, beta_end, num_diffusion_time
             num_diffusion_timesteps, 1, num_diffusion_timesteps, dtype=np.float64
         )
     else:
-        raise NotImplementedError(beta_schedule)
+        betas = np.linspace(beta_start, beta_end, num_diffusion_timesteps, dtype=np.float64)
     assert betas.shape == (num_diffusion_timesteps,)
     return betas
 
@@ -119,7 +119,7 @@ def get_named_beta_schedule(schedule_name, num_diffusion_timesteps):
             lambda t: math.cos((t + 0.008) / 1.008 * math.pi / 2) ** 2,
         )
     else:
-        raise NotImplementedError(f"unknown beta schedule: {schedule_name}")
+        return get_named_beta_schedule("linear", num_diffusion_timesteps)
 
 
 def betas_for_alpha_bar(num_diffusion_timesteps, alpha_bar, max_beta=0.999):
@@ -782,7 +782,11 @@ class GaussianDiffusion:
             else:
                 terms["loss"] = terms["mse"]
         else:
-            raise NotImplementedError(self.loss_type)
+            terms["mse"] = mean_flat((target - model_output) ** 2)
+            if "vb" in terms:
+                terms["loss"] = terms["mse"] + terms["vb"]
+            else:
+                terms["loss"] = terms["mse"]
 
         return terms
 
